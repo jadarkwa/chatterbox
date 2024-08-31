@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block styles %}
+<style>
+ @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+ 
+  body, html {
+    height: 100%;
+    font-family: 'Orbitron', sans-serif;
+    background-color: #1c1c1c; /* Darker grey background */
+    color: #fff; /* White text */
+    margin: 0;
+  }
+
+  .login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 20px;
+  }
+
+  .card {
+    max-width: 500px; /* Increased width */
+    background-color: #2a2a2a; /* Darker card background */
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+  }
+
+  .card-header {
+    background-color: #3a3a3a; /* Slightly darker grey */
+    color: #fbc02d; /* Amber text for header */
+    font-size: 28px; /* Increased font size */
+    font-weight: bold;
+    text-align: center;
+    padding: 20px;
+    border-bottom: 2px solid #555;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+
+  .card-body {
+    padding: 40px; /* Increased padding */
+  }
+
+  .form-group {
+    margin-bottom: 25px; /* Increased margin */
+  }
+
+  label {
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  input[type=text], input[type=password] {
+    border-radius: 8px; /* More rounded corners */
+    border: 1px solid #666;
+    padding: 12px; /* Increased padding */
+    font-size: 18px; /* Increased font size */
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #222; /* Dark grey input background */
+    color: #fff; /* White text */
+  }
+
+  input[type=text]:focus, input[type=password]:focus {
+    background-color: #333; /* Darker grey when focused */
+    border-color: #777; /* Slightly lighter border */
+    outline: none;
+  }
+
+  button[type=submit] {
+    background-color: #ff9800; /* Amber color */
+    color: white;
+    font-size: 18px; /* Increased font size */
+    font-weight: bold;
+    padding: 12px 24px; /* Increased padding */
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  button[type=submit]:hover {
+    background-color: #e68900; /* Darker amber on hover */
+  }
+
+  .alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 12px;
+    margin-bottom: 25px;
+    border: 1px solid #f5c6cb;
+    border-radius: 8px;
+  }
+
+  .back-button {
+    margin-top: 25px;
+    text-align: center;
+  }
+
+  .back-button a {
+    color: #ff9800; /* Amber color for back button */
+    text-decoration: none;
+    font-size: 18px; /* Increased font size */
+  }
+
+  .back-button a:hover {
+    text-decoration: underline;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+  <div class="card">
+    <div class="card-header">Login</div>
+    <div class="card-body">
+      {% if error_message %}
+        <div class="alert alert-danger" role="alert">{{ error_message }}</div>
+      {% endif %}
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" class="form-control" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <button type="submit">Login</button>
+      </form>
+      <div class="back-button">
+        <a href="{% url 'chatbot' %}">Back to Home</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

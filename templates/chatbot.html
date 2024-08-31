@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+    body, html {
+        height: 100%;
+        font-family: 'Orbitron', sans-serif;
+        background-color: #222;
+        color: #fff;
+        margin: 0;
+    }
+
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+
+    .card-header {
+        background-color: #444;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .menu-icon {
+        font-size: 24px;
+        cursor: pointer;
+        color: yellow;
+        margin-right: 15px;
+    }
+
+    .dropdown-menu {
+        display: none;
+        position: absolute;
+        top: 50px;
+        right: 15px;
+        background-color: #444;
+        border: 1px solid #333;
+        border-radius: 5px;
+        z-index: 1;
+    }
+
+    .dropdown-menu a {
+        display: block;
+        padding: 10px 15px;
+        color: #fff;
+        text-decoration: none;
+        background-color: #444;
+    }
+
+    .dropdown-menu a:hover {
+        background-color: #555;
+    }
+
+    .messages-box {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        background-color: #333;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .messages-list {
+        padding-left: 0;
+        list-style: none;
+        margin: 0;
+        overflow-y: scroll;
+        scroll-behavior: smooth;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .message {
+        max-width: 60%;
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 15px;
+        word-wrap: break-word;
+        position: relative;
+        display: inline-block;
+    }
+
+    .message.sent {
+        align-self: flex-end;
+        background-color: #007bff;
+        color: #fff;
+        border-bottom-right-radius: 0;
+    }
+
+    .message.received {
+        align-self: flex-start;
+        background-color: #444;
+        color: #00ff00;
+        border-bottom-left-radius: 0;
+    }
+
+    .message-form {
+        display: flex;
+        padding: 10px;
+        background-color: #333;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+
+    .message-input {
+        flex-grow: 1;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #666;
+        background-color: #333 !important; /* Dark grey background */
+        color: #fff !important; /* White text */
+        outline: none;
+    }
+
+    .message-input::placeholder {
+        color: #aaa; /* Light grey text for placeholder */
+    }
+
+    .message-input:focus {
+        background-color: #333 !important; /* Dark grey background on focus */
+        color: #fff !important; /* Ensure white text on focus */
+        border-color: #555;
+        outline: none; /* Remove default focus outline */
+    }
+
+    .btn-send {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: #fff;
+        margin-left: 10px;
+    }
+
+    .btn-send:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+    }
+
+    @media (max-width: 768px) {
+        .message {
+            max-width: 80%;
+        }
+
+        .message-form {
+            flex-direction: column;
+        }
+
+        .message-input {
+            margin-bottom: 10px;
+        }
+
+        .btn-send {
+            width: 100%;
+            margin-left: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="card flex-grow-1">
+        <div class="card-header text-white">
+            <span>CHATTERBOX</span>
+            <span class="menu-icon" onclick="toggleDropdown()">&#9776;</span>
+            <div class="dropdown-menu" id="dropdownMenu">
+                {% if user.is_authenticated %}
+                    <a href="logout">Logout</a>
+                {% else %}
+                    <a href="login">Login</a>
+                    <a href="register">Register</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body messages-box">
+            <ul class="list-unstyled messages-list">
+                <li class="message received">
+                    <div class="message-content">
+                        Hi {{user.username}}, Welcome To CHATTERBOX, your personal AI Chatting Assistant, ask me anything!.
+                    </div>
+                </li>
+
+                {% for chat in chats %}
+                    {% if chat.user == request.user %}
+                    <li class="message sent">
+                        <div class="message-content">
+                            {{chat.message}}
+                        </div>
+                    </li>
+                    <li class="message received">
+                        <div class="message-content">
+                            {{chat.response}}
+                        </div>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <form class="message-form">
+        {% csrf_token %}
+        <input type="text" class="form-control message-input" placeholder="Type your message...">
+        <button type="submit" class="btn btn-primary btn-send">Send</button>
+    </form>
+</div>
+
+<script>
+    function toggleDropdown() {
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    }
+
+    const messagesList = document.querySelector('.messages-list');
+    const messageForm = document.querySelector('.message-form');
+    const messageInput = document.querySelector('.message-input');
+
+    messageForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const message = messageInput.value.trim();
+        if (message.length === 0) {
+            return;
+        }
+
+        const messageItem = document.createElement('li');
+        messageItem.classList.add('message', 'sent');
+        messageItem.innerHTML = `
+            <div class="message-content">
+                ${message}
+            </div>`;
+        messagesList.appendChild(messageItem);
+
+        messageInput.value = '';
+        messagesList.scrollTop = messagesList.scrollHeight;
+
+        fetch('', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                'csrfmiddlewaretoken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'message': message
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const response = data.response;
+            const messageItem = document.createElement('li');
+            messageItem.classList.add('message', 'received');
+            messageItem.innerHTML = `
+            <div class="message-content">
+                ${response}
+            </div>`;
+            messagesList.appendChild(messageItem);
+            messagesList.scrollTop = messagesList.scrollHeight;
+        });
+    });
+</script>
+{% endblock %}
